@@ -1,4 +1,3 @@
-
 from __future__ import print_function
 
 import time
@@ -22,6 +21,8 @@ from sklearn.pipeline import Pipeline
 from sagemaker_containers.beta.framework import (
     content_types, encoders, env, modules, transformer, worker)
 
+
+import transformers as trf
 
 class BaseError(Exception):
     """ Base package error"""
@@ -110,7 +111,7 @@ class RareLabelCategoryImputer(BaseEstimator, TransformerMixin):
         return self
 
     def transform(self, X: pd.DataFrame, y=None):
-        """creates new category label rare for observations not conatined in 
+        """creates new category label rare for observations not conatined in
            frequent_labels_dict"""
 
         X = X.copy()
@@ -223,15 +224,15 @@ categorical_features = ['ExterQual',
                         'LandContour']
 
 #categorical features with na
-categorical_features_with_na = ['BsmtQual', 
-                                'GarageCond', 
-                                'GarageQual', 
-                                'GarageFinish', 
+categorical_features_with_na = ['BsmtQual',
+                                'GarageCond',
+                                'GarageQual',
+                                'GarageFinish',
                                 'FireplaceQu']
 
-categorical_na_not_allowed = [ 'CentralAir', 
-                               'ExterQual', 
-                               'KitchenQual', 
+categorical_na_not_allowed = [ 'CentralAir',
+                               'ExterQual',
+                               'KitchenQual',
                                'LandContour',
                                'Neighborhood' ]
 
@@ -259,18 +260,54 @@ target = 'SalePrice'
 house_price_preprocessing_pipeline = Pipeline(
     [
     ('categorical_nan_imputer',
-    CategoricalNaNImputer(variables=categorical_features_with_na,
+    trf.CategoricalNaNImputer(variables=categorical_features_with_na,
                                             category='MissingValue')),
     ('numerical_na_imputer',
-    NumeriaclNaNImputer(variables=numerical_features_with_na)),
+    trf.NumeriaclNaNImputer(variables=numerical_features_with_na)),
     ('rare_label_encoder',
-    RareLabelCategoryImputer(variables=categorical_features, tol=0.01)),
+    trf.RareLabelCategoryImputer(variables=categorical_features, tol=0.01)),
     ('cateogrical_encoder',
-    CategoricalMonotonicEncoder(variables=categorical_features)),
+    trf.CategoricalMonotonicEncoder(variables=categorical_features)),
     ('binary_feature_generator',
-    BinaryFeatureGenerator(variables=features_for_feature_generation)),
+    trf.BinaryFeatureGenerator(variables=features_for_feature_generation)),
     ('drop_features',
-    DropFeatures(drop_features=drop_features))])
+    trf.DropFeatures(drop_features=drop_features))])
+
+
+def input_fn(input_data, content_type):
+    if content_type == 'text/csv':
+        raw_data = pd.read_csv(StringIO(input_data))
+
+        return raw_data
+    else:
+        raise ValueError('This script only takes csv')
+
+
+def output_fn(prediction, accept):
+        if accept == "application/json":
+            instances = []
+            for row in prediction.tolist():
+                instances.append({"features": row})
+
+            json_output = {"instances": instances}
+
+            return worker.Response(json.dumps(json_output), accept, mimetype=accept)
+        elif accept == 'text/csv':
+            return worker.Response(encoders.encode(prediction, accept), accept, mimetype=accept)
+        else:
+            raise RuntimeException("{} accept type is not supported by this script.".format(accept))
+
+
+def predict_fn(input_data, model):
+        features =  model.transform(input_data)
+        return features
+
+
+
+def model_fn(model_dir):
+    preprocessor = joblib.load(os.path.join(model_dir, "model.joblib"))
+    return preprocessor
+
 
 
 if __name__ == "__main__":
@@ -304,36 +341,3 @@ if __name__ == "__main__":
     joblib.dump(house_price_preprocessing_pipeline,
                 os.path.join(args.model_dir, "model.joblib"))
     print("Saving model....")
-
-def input_fn(input_data, content_type):
-    if content_type == 'text/csv':
-        raw_data = pd.read_csv(StringIO(input_data))
-
-        return raw_data
-    else:
-        raise ValueError('This script only takes csv')
-
-
-def output_fn(prediction, accept):
-
-        if accept == "application/json":
-            instances = []
-            for row in prediction.tolist():
-                instances.append({"features": row})
-
-            json_output = {"instances": instances}
-
-            return worker.Response(json.dumps(json_output), accept, mimetype=accept)
-        elif accept == 'text/csv':
-            return worker.Response(encoders.encode(prediction, accept), accept, mimetype=accept)
-        else:
-            raise RuntimeException("{} accept type is not supported by this script.".format(accept))
-
-def predict_fn(input_data, model):
-        features =  model.transform(input_data)
-        return features
-
-
-def model_fn(model_dir):
-    preprocessor = joblib.load(os.path.join(model_dir, "model.joblib"))
-    return preprocessor
