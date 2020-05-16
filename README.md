@@ -82,3 +82,10 @@ API for this project:  https://i73xeinese.execute-api.us-west-2.amazonaws.com/be
 
 
 
+## Project Structure.
+* /houseprice-prediction-inference-pipeline.ipynb: SageMaker notebook, Modelling and Inference Pipeline.
+* /preprocessor.py: Custom transformer script, entry point for bulding inference pipeline.
+* /transformers.py: Depedency script.
+* /sagemaker-custom-model/Dockerfile: Custom sagemaker image.
+* /sagemaker-custom-model/xgboost/train: Custom model train script 
+* /sagemaker-custom-model/xgboost/predictor.py: Serve Prediction
