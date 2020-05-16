@@ -27,10 +27,10 @@ this was achieved through the following steps
 
 Image repo: 249021303942.dkr.ecr.us-west-2.amazonaws.com/sagemaker-custom-models 
 
-To train with this model, all thatis needed is to specify the location in ECR.
+To train with this model in sagemaker, all that is needed is to specify the location in ECR.
 
 
-## Building an inference pipeline for preprocessing and feature engineering in sagemaker training and deploying the model
+## Building an inference pipeline for preprocessing and feature engineering in sagemaker,training and deploying the model
 
 For data preprocessing and feature engineering there are alot of options during deployment, 
 one way is to specify transformations in aws lambda but rather than having a bulk of functions and layers in aws lambda an
