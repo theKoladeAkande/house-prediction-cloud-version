@@ -9,7 +9,7 @@ following:
 2. Building an inference pipeline for preprocessing and feature engineering in sagemaker.
 3. Training and deploying the model.
 4. Invoking model predictions with aws lambda.
-5. Integrating lambda with aws api gateway to serve model predictions via RestApi
+5. Integrating lambda with aws api gateway to serve model predictions to clients via RestApi
 
 ## Building a custom model for use in aws sagemaker
 
