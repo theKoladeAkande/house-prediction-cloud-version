@@ -1,0 +1,75 @@
+#!/usr/bin/env python
+
+import os
+import json
+import pickle
+import sys
+import traceback
+
+import pandas as pd
+
+import xgboost as xgb
+
+
+
+prefix = '/opt/ml/'
+
+input_path = prefix + 'input/data'
+output_path = os.path.join(prefix, 'output')
+model_path = os.path.join(prefix, 'model')
+param_path = os.path.join(prefix, 'input/config/hyperparameters.json')
+
+
+channel_name ='training'
+training_path = os.path.join(input_path, channel_name)
+
+def train():
+    """
+    Function executes training
+    """
+    print('Training model...')
+    try:
+        # Read in any hyperparameters for training job
+        with open(param_path, 'r') as tc:
+            training_params = json.load(tc)
+
+        # Take the set of files or file and read them all into a single pandas dataframe
+
+        input_files = [os.path.join(training_path, file) for file in os.listdir(training_path)]
+        if not input_files:
+            raise ValueError(('There are no files in {}.\n' +
+                              'This usually indicates that the channel ({}) was incorrectly specified,\n' +
+                              'the data specification in S3 was incorrectly specified or the role specified\n' +
+                              'does not have permission to access the data.').format(training_path, channel_name))
+        if len(input_files) >= 2:
+            raw_data = [ pd.read_csv(file, header=None) for file in input_files ]
+            train_data = pd.concat(raw_data)
+        else:
+            train_data = pd.read_csv(input_files[0])
+
+        train_X = train_data.iloc[:, :-1]
+        train_y = train_data.iloc[:, -1].to_frame()
+
+
+        xgb_rgr = xgb.XGBRegressor(seed=42, **training_params)
+        xgb_rgr = xgb_rgr.fit(train_X, train_y)
+
+        # save the model
+        with open(os.path.join(model_path, 'xgboost-regression-model.pkl'), 'w') as out:
+            pickle.dump(xgb_rgr, out)
+        print('Training complete...')
+
+    except Exception as e:
+        # Write out an error file. This will be returned as the failureReason in the
+        # DescribeTrainingJob result.
+        trc = traceback.format_exc()
+        with open(os.path.join(output_path, 'failure'), 'w') as s:
+            s.write('Exception during training: ' + str(e) + '\n' + trc)
+        print('Exception during training: ' + str(e) + '\n' + trc, file=sys.stderr)
+
+        sys.exit(255)
+
+if __name__ == '__main__':
+    train()
+
+    sys.exit(0)
