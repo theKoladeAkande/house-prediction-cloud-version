@@ -1,0 +1,13 @@
+Exception during training: DataFrame.dtypes for data must be int, float or bool.
+                Did not expect the data types in fields MSZoning, Street, Alley, LotShape, LandContour, Utilities, LotConfig, LandSlope, Neighborhood, Condition1, Condition2, BldgType, HouseStyle, RoofStyle, RoofMatl, Exterior1st, Exterior2nd, MasVnrType, ExterQual, ExterCond, Foundation, BsmtQual, BsmtCond, BsmtExposure, BsmtFinType1, BsmtFinType2, Heating, HeatingQC, CentralAir, Electrical, KitchenQual, Functional, FireplaceQu, GarageType, GarageFinish, GarageQual, GarageCond, PavedDrive, PoolQC, Fence, MiscFeature, SaleType, SaleCondition
+Traceback (most recent call last):
+  File "/opt/program/train", line 55, in train
+    xgb_rgr = xgb_rgr.fit(train_X, train_y)
+  File "/usr/local/lib/python3.7/site-packages/xgboost/sklearn.py", line 360, in fit
+    trainDmatrix = DMatrix(X, label=y, missing=self.missing, nthread=self.n_jobs)
+  File "/usr/local/lib/python3.7/site-packages/xgboost/core.py", line 380, in __init__
+    feature_types)
+  File "/usr/local/lib/python3.7/site-packages/xgboost/core.py", line 239, in _maybe_pandas_data
+    raise ValueError(msg + ', '.join(bad_fields))
+ValueError: DataFrame.dtypes for data must be int, float or bool.
+                Did not expect the data types in fields MSZoning, Street, Alley, LotShape, LandContour, Utilities, LotConfig, LandSlope, Neighborhood, Condition1, Condition2, BldgType, HouseStyle, RoofStyle, RoofMatl, Exterior1st, Exterior2nd, MasVnrType, ExterQual, ExterCond, Foundation, BsmtQual, BsmtCond, BsmtExposure, BsmtFinType1, BsmtFinType2, Heating, HeatingQC, CentralAir, Electrical, KitchenQual, Functional, FireplaceQu, GarageType, GarageFinish, GarageQual, GarageCond, PavedDrive, PoolQC, Fence, MiscFeature, SaleType, SaleCondition
