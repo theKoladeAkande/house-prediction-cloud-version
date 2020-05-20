@@ -14,7 +14,7 @@ following:
 ## Building a custom model for use in aws sagemaker
 
 Sagemaker plays host to a lot of machine learning model that could be used out of the box but also offers the flexibility of
-using a custom model. The custom built here is the same  xgboost model with that of the 
+using a custom model. The custom built for this project is the same  xgboost model with that of the 
 [house-price-prediction](https://github.com/theKoladeAkande/house-price-prediction) to use this model in sagemaker the model must
 comply with the sagemaker's architecture more on this [here](https://sagemaker-workshop.com/custom/containers.html), 
 this was achieved through the following steps
@@ -33,10 +33,10 @@ To train with this model in sagemaker, all that is needed is to specify the loca
 ## Building an inference pipeline for preprocessing and feature engineering in sagemaker,training and deploying the model
 
 For data preprocessing and feature engineering there are alot of options during deployment, 
-one way is to specify transformations in aws lambda but rather than having a bulk of functions and layers in aws lambda an
-inference pipeline was built which seemed to be cleaner. 
+one way is to specify transformations in aws lambda rather than having a bulk of functions and layers in aws lambda an
+inference pipeline was built for this project, it seemed to be cleaner approach.
 
-Building an inference pipeline involved the following steps:
+Building the inference pipeline involved the following steps:
 
 1. Custom transformer script:
 Writing a script subclassing sklearn.base TransformerMxn and Base classes to build custom transformers,
